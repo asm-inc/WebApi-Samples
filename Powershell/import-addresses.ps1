@@ -95,29 +95,30 @@ class MDStaffApi {
 
 
 $api = [MDStaffApi]::new($instance, $accessKey, $secret, $facility)
-$api.refreshToken()
-$api.refreshToken()
+Function FindProvider() {
+    param (
+        [string]$npi
+    )
+    $query = [Query]::new()
+    $query.source = "Demographic"
+    $query.fields = @("ProviderID", "LastName", "FirstName", "NPI")
+    $query.filter = [PSCustomObject]@{
+        NPI = @( [PSCustomObject]@{ 
+            type = "in"
+            values = @($npi)
+        } ) }
 
-$query = [Query]::new()
-$query.source = "Demographic"
-$query.fields = @("LastName", "FirstName", "NPI")
-$query.filter = [PSCustomObject]@{
-    NPI = @( [PSCustomObject]@{ 
-        type = "not in"
-        values = @($null)
-    } ) }
-$query.sort = @(
-    [PSCustomObject]@{ LastName = "ASC" },
-    [PSCustomObject]@{ FirstName = "ASC" }
-)
+    $provider = $api.queryFromObject($query)
+    return $provider[0].ProviderID
+}
 
+$data = Import-Csv -Path "data/provider-address.csv"
 
+foreach ($row in $data) {
+    $providerID = FindProvider $row.NPI
+    $row | Add-Member NoteProperty -Name "ProviderID" -Value $providerID
+    $rowJson = ConvertTo-Json $row
+    $savedAddress = $api.post("/object/Address", $rowJson)
+}
 
-$results = $api.queryFromObject($query)
-Write-Host "$($results[0].FirstName) $($results[0].LastName): $($results[0].NPI)"
-
-
-#$token = authenticate "asm-venus" -client_id "Import-Test" -client_secret "xKoNxfdNByWx0NGqebpYH0wg1clJMNkak3oLUj0F" -facility "501A1D4F-EFE8-40EC-ACA7-4DDDC39329E0"
-#Write-Host $token
-
-#$data = Import-Csv -Path "data/provider-address.csv"
+Write-Host "Done"
