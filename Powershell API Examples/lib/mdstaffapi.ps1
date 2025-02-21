@@ -154,4 +154,21 @@ class MDStaffApi {
         #Write-Host $data
         return ConvertFrom-Json $data
     }
+	
+	[Object]postObject([string]$urlPath, [PsCustomObject]$bodyJsonString) {
+        # Refresh the token if needed
+		$this.refreshToken()
+		
+        # Run the query
+        $url = "https://$($this.Instance).$($this.BaseUrl)/$($this.Instance)$urlPath"
+        Write-Host "POST $url"
+        $headers = @{
+            Authorization = "Bearer $($this.Token.access_token)"
+        }
+
+        $response = Invoke-WebRequest -Uri $url -Method POST -Headers $headers -Body $bodyJsonString -ContentType "application/json"
+        $data = $response.Content
+        #Write-Host $data
+        return $data
+    }
 }
