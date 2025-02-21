@@ -6,6 +6,26 @@ class Query {
 	[Object]$settings
 }
 
+class ProviderFile {
+    [string]$providerID
+    [string]$providerFileData
+
+	ProviderFile([string]$provider_id, [string]$provider_file_data) {
+        $this.providerID = $provider_id
+        $this.providerFileData = $provider_file_data
+    }
+}
+
+class PDFFile {
+    [string]$PrimaryID
+    [string]$FileName
+
+	PDFFile([string]$primary_ID, [string]$fileName) {
+        $this.PrimaryID = $primary_ID
+        $this.FileName = $fileName
+    }
+}
+
 class MDStaffApi {
     [string]$BaseUrl
     [string]$Instance
